@@ -4,11 +4,14 @@ export default function Footer() {
       <div className="max-w-7xl mx-auto">
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-12 mb-20">
           <div className="lg:col-span-2">
-            <div className="flex items-center gap-2 mb-8">
-              <span className="font-display text-3xl tracking-tighter rainbow-logo">RanginGFX</span>
+            <div className="flex items-center gap-3 mb-8">
+              <div className="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center">
+                <span className="text-white font-black text-2xl italic">R</span>
+              </div>
+              <span className="font-display text-3xl tracking-tighter font-black text-white">RANGINGFX</span>
             </div>
-            <h2 className="text-4xl font-display font-bold max-w-sm mb-8 uppercase leading-tight">
-              READY TO LAUNCH YOUR NEXT <span className="text-blue-500 italic">BIG</span> THING?
+            <h2 className="text-4xl md:text-6xl font-display font-black max-w-sm mb-10 uppercase leading-[0.9] tracking-tighter">
+              READY TO <span className="text-transparent bg-clip-text bg-gradient-to-b from-blue-400 to-blue-600 italic">SCALe</span> YOUR CORE?
             </h2>
             <div className="flex gap-4">
               <a href="https://wa.me/923121700872" target="_blank" rel="noreferrer" className="px-8 py-4 bg-emerald-600 text-white rounded-2xl font-bold hover:bg-emerald-500 transition-colors flex items-center gap-2">

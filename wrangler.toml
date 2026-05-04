@@ -1,0 +1,10 @@
+#:schema node_modules/wrangler/config-schema.json
+name = "rangingfx-agency"
+compatibility_date = "2024-04-03"
+pages_build_output_dir = "./dist"
+
+[vars]
+AICC_API_URL = "https://api.ai.cc/v1"
+
+# To deploy functions, ensure they are in the ./functions directory
+# or use the Pages + Functions architecture

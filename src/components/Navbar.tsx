@@ -17,67 +17,77 @@ export default function Navbar({ onDashboardToggle, onAdminToggle }: { onDashboa
   ];
 
   return (
-    <nav className="fixed top-0 left-0 w-full z-50 px-6 py-4">
-      <div className="max-w-7xl mx-auto flex items-center justify-between glass-card px-6 py-3 rounded-full">
-        <div className="flex items-center gap-2 cursor-pointer" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
-          <span className="font-display text-2xl tracking-tighter rainbow-logo">RanginGFX</span>
+    <nav className="fixed top-0 left-0 w-full z-50 px-6 py-6 pointer-events-none">
+      <div className="max-w-7xl mx-auto flex items-center justify-between enterprise-glass px-8 py-3 rounded-2xl pointer-events-auto">
+        <div 
+          className="flex items-center gap-3 cursor-pointer group" 
+          onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+        >
+          <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center transform group-hover:rotate-12 transition-transform">
+            <span className="text-white font-black text-lg italic">R</span>
+          </div>
+          <span className="font-display text-xl tracking-tighter font-black text-white hover:text-blue-400 transition-colors">RANGINGFX</span>
         </div>
 
         {/* Desktop Links */}
-        <div className="hidden md:flex items-center gap-8">
+        <div className="hidden md:flex items-center gap-10">
           {navLinks.map((link) => (
             <a
               key={link.name}
               href={link.href}
-              className="text-sm font-medium text-white/70 hover:text-white transition-colors"
+              className="text-[10px] font-mono font-bold text-white/40 hover:text-blue-400 transition-all uppercase tracking-[0.2em]"
             >
               {link.name}
             </a>
           ))}
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-6">
           {user ? (
             <div className="relative">
               <button 
                 onClick={() => setShowProfile(!showProfile)}
-                className="flex items-center gap-2 bg-white/5 hover:bg-white/10 px-3 py-1.5 rounded-full border border-white/10 transition-colors"
+                className="flex items-center gap-3 bg-white/[0.03] hover:bg-white/[0.08] pl-1 pr-3 py-1 rounded-xl border border-white/10 transition-all active:scale-95"
               >
-                <img src={user.photoURL} alt={user.displayName} className="w-6 h-6 rounded-full" />
-                <span className="text-xs font-semibold hidden lg:block">{user.displayName.split(' ')[0]}</span>
-                <ChevronDown className="w-3 h-3" />
+                <img src={user.photoURL} alt={user.displayName} className="w-8 h-8 rounded-lg object-cover" />
+                <span className="text-[10px] font-mono font-bold hidden lg:block tracking-widest text-white/70">{user.displayName.split(' ')[0].toUpperCase()}</span>
+                <ChevronDown className={`w-3 h-3 transition-transform ${showProfile ? 'rotate-180' : ''}`} />
               </button>
               
               <AnimatePresence>
                 {showProfile && (
                   <motion.div
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: 10 }}
-                    className="absolute right-0 mt-3 w-48 glass-card rounded-2xl p-2 border border-white/10 shadow-2xl"
+                    initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                    className="absolute right-0 mt-4 w-56 enterprise-glass rounded-2xl p-2 border border-white/10 shadow-2xl overflow-hidden"
                   >
+                    <div className="px-4 py-3 border-b border-white/5 mb-2">
+                       <p className="text-[10px] font-mono text-white/30 uppercase tracking-widest mb-1">Authenticated As</p>
+                       <p className="text-xs font-bold truncate text-white">{user.email}</p>
+                    </div>
                     <button 
                       onClick={() => { onDashboardToggle(); setShowProfile(false); }}
-                      className="w-full flex items-center gap-2 px-4 py-2.5 text-sm hover:bg-white/5 rounded-xl transition-colors"
+                      className="w-full flex items-center gap-3 px-4 py-3 text-xs font-bold hover:bg-white/5 rounded-xl transition-colors text-white/70 hover:text-white"
                     >
-                      <LayoutDashboard className="w-4 h-4" />
-                      Dashboard
+                      <LayoutDashboard className="w-4 h-4 text-blue-500" />
+                      PROJECT_CONTROL
                     </button>
                     {user.role === 'admin' && (
                       <button 
                         onClick={() => { onAdminToggle(); setShowProfile(false); }}
-                        className="w-full flex items-center gap-2 px-4 py-2.5 text-sm hover:bg-white/5 rounded-xl transition-colors"
+                        className="w-full flex items-center gap-3 px-4 py-3 text-xs font-bold hover:bg-white/5 rounded-xl transition-colors text-white/70 hover:text-white"
                       >
-                        <Settings className="w-4 h-4" />
-                        Admin Panel
+                        <Settings className="w-4 h-4 text-purple-500" />
+                        SYSTEM_CORE
                       </button>
                     )}
                     <button 
                       onClick={() => logout()}
-                      className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-red-400 hover:bg-red-400/5 rounded-xl transition-colors"
+                      className="w-full flex items-center gap-3 px-4 py-3 text-xs font-bold text-red-400/70 hover:text-red-400 hover:bg-red-400/5 rounded-xl transition-colors"
                     >
                       <LogOut className="w-4 h-4" />
-                      Logout
+                      DISCONNECT
                     </button>
                   </motion.div>
                 )}
@@ -86,16 +96,16 @@ export default function Navbar({ onDashboardToggle, onAdminToggle }: { onDashboa
           ) : (
             <button 
               onClick={() => loginWithGoogle()}
-              className="flex items-center gap-2 bg-white text-primary px-5 py-2 rounded-full text-sm font-semibold hover:bg-blue-500 hover:text-white transition-all group"
+              className="shimmer-button flex items-center gap-3 bg-blue-600 text-white px-7 py-3 rounded-xl text-xs font-black hover:bg-blue-700 transition-all group shadow-xl shadow-blue-600/20 active:scale-95"
             >
-              Sign In
+              INITIALIZE
               <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
             </button>
           )}
 
           {/* Mobile Toggle */}
-          <button className="md:hidden text-white" onClick={() => setIsOpen(!isOpen)}>
-            {isOpen ? <X /> : <Menu />}
+          <button className="md:hidden text-white/50 hover:text-white transition-colors" onClick={() => setIsOpen(!isOpen)}>
+            {isOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
           </button>
         </div>
       </div>

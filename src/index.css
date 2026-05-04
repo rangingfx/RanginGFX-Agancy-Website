@@ -6,44 +6,72 @@
   --font-display: "Outfit", sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
 
-  --color-primary: #0B0B0B;
-  --color-accent: #2563EB;
-  --color-secondary: #7C3AED;
+  --color-primary: #050505;
+  --color-accent: #3B82F6;
+  --color-secondary: #06B6D4;
+  --color-emerald: #10B981;
 
-  @keyframes gradient-x {
-    0%, 100% {
-      background-position: 0% 50%;
-    }
-    50% {
-      background-position: 100% 50%;
-    }
+  @keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-10px); }
   }
 
+  @keyframes pulse-slow {
+    0%, 100% { opacity: 0.3; }
+    50% { opacity: 0.6; }
+  }
+
+  @keyframes shimmer {
+    from { transform: translateX(-100%); }
+    to { transform: translateX(100%); }
+  }
+
+  @keyframes gradient-x {
+    0%, 100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+  }
+
+  --animate-float: float 6s ease-in-out infinite;
+  --animate-pulse-slow: pulse-slow 4s ease-in-out infinite;
+  --animate-shimmer: shimmer 2s infinite;
   --animate-gradient-x: gradient-x 5s ease infinite;
 }
 
 @layer base {
   body {
-    @apply font-sans antialiased bg-[#0A0A0A] text-white overflow-x-hidden;
+    @apply font-sans antialiased bg-[#050505] text-white/90 overflow-x-hidden;
   }
 
   html {
     scroll-behavior: smooth;
   }
+  
+  ::selection {
+    @apply bg-blue-500/30 text-white;
+  }
 }
 
 @layer utilities {
-  .text-glass {
-    @apply bg-clip-text text-transparent bg-gradient-to-b from-white/90 to-white/40;
-  }
-  
-  .glass-card {
-    @apply bg-white/5 backdrop-blur-xl border border-white/10;
+  .enterprise-glass {
+    @apply bg-white/[0.02] backdrop-blur-2xl border border-white/10 shadow-[0_8px_32px_0_rgba(0,0,0,0.8)];
   }
 
-  .mobile-card-grid {
-    @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6;
+  .text-glow {
+    text-shadow: 0 0 20px rgba(59, 130, 246, 0.5);
   }
+
+  .hero-gradient {
+    background: radial-gradient(circle at 50% 50%, rgba(59, 130, 246, 0.15) 0%, transparent 50%);
+  }
+  
+  .shimmer-button {
+    @apply relative overflow-hidden;
+  }
+  
+  .shimmer-button::after {
+    @apply content-[''] absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/10 to-transparent animate-shimmer;
+  }
+}
 
   .rainbow-text {
     @apply bg-clip-text text-transparent bg-gradient-to-r from-[#ff0000] via-[#ff7f00] via-[#ffff00] via-[#00ff00] via-[#0000ff] via-[#4b0082] to-[#8f00ff] animate-gradient-x;
@@ -80,4 +108,3 @@
     opacity: 0 !important;
     pointer-events: none !important;
   }
-}
