@@ -27,22 +27,39 @@ export interface FirestoreErrorInfo {
 }
 
 export function handleFirestoreError(error: unknown, operationType: OperationType, path: string | null) {
+  let authInfo = {
+    userId: null as string | null,
+    email: null as string | null,
+    emailVerified: false as boolean,
+    isAnonymous: false as boolean,
+    tenantId: null as string | null,
+    providerInfo: [] as any[]
+  };
+
+  try {
+    if (auth?.currentUser) {
+      authInfo = {
+        userId: auth.currentUser.uid,
+        email: auth.currentUser.email,
+        emailVerified: auth.currentUser.emailVerified,
+        isAnonymous: auth.currentUser.isAnonymous,
+        tenantId: auth.currentUser.tenantId,
+        providerInfo: auth.currentUser.providerData?.map(provider => ({
+          providerId: provider.providerId,
+          email: provider.email,
+        })) || []
+      };
+    }
+  } catch (e) {
+    console.warn("Could not retrieve auth state for error report", e);
+  }
+
   const errInfo: FirestoreErrorInfo = {
     error: error instanceof Error ? error.message : String(error),
-    authInfo: {
-      userId: auth.currentUser?.uid,
-      email: auth.currentUser?.email,
-      emailVerified: auth.currentUser?.emailVerified,
-      isAnonymous: auth.currentUser?.isAnonymous,
-      tenantId: auth.currentUser?.tenantId,
-      providerInfo: auth.currentUser?.providerData?.map(provider => ({
-        providerId: provider.providerId,
-        email: provider.email,
-      })) || []
-    },
+    authInfo,
     operationType,
     path
   }
-  console.error('Firestore Error: ', JSON.stringify(errInfo));
+  console.error('[FIRESTORE ERROR]', JSON.stringify(errInfo));
   throw new Error(JSON.stringify(errInfo));
 }

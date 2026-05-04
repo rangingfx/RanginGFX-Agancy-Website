@@ -19,16 +19,16 @@ async function startServer() {
 
   // Security & Optimization Middleware
   app.use(helmet({
-    contentSecurityPolicy: false, // Vite handles CSP in dev, adjust for prod if needed
+    contentSecurityPolicy: false, 
   }));
   app.use(cors());
-  app.use(express.json({ limit: "10kb" })); // Body size limit to prevent DDoS
-  app.use(morgan("combined")); // Standard production logging
+  app.use(express.json({ limit: "50kb" })); 
+  app.use(morgan("dev")); 
 
-  // Rate Limiting: 100 requests per 15 minutes per IP
+  // Rate Limiting: 1000 requests per 15 minutes (Relaxed for dev/demo)
   const limiter = rateLimit({
     windowMs: 15 * 60 * 1000,
-    limit: 100,
+    limit: 1000,
     standardHeaders: "draft-7",
     legacyHeaders: false,
     message: { error: "Too many requests, please try again later." }
@@ -43,6 +43,50 @@ async function startServer() {
       uptime: process.uptime(),
       timestamp: new Date().toISOString() 
     });
+  });
+
+  // AI Assistant Proxy (api.ai.cc)
+  app.post("/api/v1/ai/chat", async (req, res) => {
+    try {
+      const { messages, systemInstruction } = req.body;
+      
+      if (!messages || !Array.isArray(messages)) {
+        return res.status(400).json({ error: "Messages are required" });
+      }
+
+      const response = await fetch(`${process.env.AICC_API_URL || "https://api.ai.cc/v1"}/chat/completions`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${process.env.AICC_API_KEY}`
+        },
+        body: JSON.stringify({
+          model: "gpt-4o", // Defaulting to a high-quality model
+          messages: [
+            { role: "system", content: systemInstruction },
+            ...messages.map((m: any) => ({
+              role: m.role === "model" ? "assistant" : m.role,
+              content: m.text || m.content
+            }))
+          ],
+          temperature: 0.7,
+        })
+      });
+
+      const data: any = await response.json();
+      
+      if (!response.ok) {
+        console.error("[AI ERROR]", data);
+        throw new Error(data.error?.message || "AI service error");
+      }
+
+      res.json({
+        text: data.choices[0].message.content
+      });
+    } catch (error: any) {
+      console.error("[AI PROXY ERROR]", error);
+      res.status(500).json({ error: error.message || "Failed to process AI request" });
+    }
   });
 
   // Example API route for payments

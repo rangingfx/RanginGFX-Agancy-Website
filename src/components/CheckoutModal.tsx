@@ -13,10 +13,10 @@ interface CheckoutModalProps {
 
 export default function CheckoutModal({ service, isOpen, onClose }: CheckoutModalProps) {
   const { user } = useAuth();
-  const [method, setMethod] = useState<'paypal' | 'easypaisa' | null>(null);
+  const [method, setMethod] = useState<'paypal' | 'qr' | null>(null);
   const [status, setStatus] = useState<'selecting' | 'redirecting' | 'success' | 'error'>('selecting');
 
-  const handlePaymentSuccess = async (details: any) => {
+  const handleManualOrder = async (payMethod: 'paypal' | 'qr') => {
     if (!user) return;
     setStatus('redirecting');
     try {
@@ -25,37 +25,15 @@ export default function CheckoutModal({ service, isOpen, onClose }: CheckoutModa
         serviceId: service.id,
         serviceTitle: service.title,
         status: 'pending',
-        paymentStatus: 'paid',
-        amount: service.price
+        paymentStatus: 'unpaid',
+        amount: service.price,
+        paymentMethod: payMethod
       });
       setStatus('success');
     } catch (e) {
-      console.error("Order creation failed", e);
+      console.error(e);
       setStatus('error');
     }
-  };
-
-  const handleEasypaisaPayment = async () => {
-    if (!user) return;
-    setStatus('redirecting');
-    
-    // Mocking the redirect delay for Easypaisa
-    setTimeout(async () => {
-      try {
-        await orderService.createOrder({
-          userId: user.uid,
-          serviceId: service.id,
-          serviceTitle: service.title,
-          status: 'pending',
-          paymentStatus: 'paid', // Mocking successful payment
-          amount: service.price
-        });
-        setStatus('success');
-      } catch (e) {
-        console.error("Order creation failed", e);
-        setStatus('error');
-      }
-    }, 2000);
   };
 
   return (
@@ -78,14 +56,14 @@ export default function CheckoutModal({ service, isOpen, onClose }: CheckoutModa
           >
             {status === 'selecting' && (
               <div className="p-8">
-                <div className="flex justify-between items-center mb-8">
+                <div className="flex justify-between items-center mb-8 text-white">
                   <h2 className="text-2xl font-display font-bold">Secure Checkout</h2>
                   <button onClick={onClose} className="p-2 hover:bg-white/10 rounded-full transition-colors">
                     <X />
                   </button>
                 </div>
 
-                <div className="bg-white/5 rounded-2xl p-4 mb-8 border border-white/5">
+                <div className="bg-white/5 rounded-2xl p-4 mb-8 border border-white/5 text-white">
                   <p className="text-xs font-mono text-blue-400 uppercase tracking-widest mb-1">Selected Service</p>
                   <div className="flex justify-between items-center">
                     <p className="font-bold">{service.title}</p>
@@ -104,32 +82,32 @@ export default function CheckoutModal({ service, isOpen, onClose }: CheckoutModa
                   >
                     <div className="flex items-center gap-4">
                       <div className="w-10 h-10 bg-[#003087] rounded-lg flex items-center justify-center">
-                        <CreditCard className="w-6 h-6 text-white" />
+                        <CreditCard className="w-5 h-5 text-white" />
                       </div>
                       <div className="text-left">
-                        <p className="font-bold">PayPal</p>
-                        <p className="text-xs text-white/40 italic">Global digital wallet</p>
+                        <p className="font-bold text-white">PayPal</p>
+                        <p className="text-xs text-white/40 italic">International / PayPal.me</p>
                       </div>
                     </div>
-                    {method === 'paypal' && <div className="w-4 h-4 bg-blue-500 rounded-full shadow-[0_0_10px_#3b82f6]" />}
+                    {method === 'paypal' && <div className="w-3 h-3 bg-blue-500 rounded-full shadow-[0_0_10px_#3b82f6]" />}
                   </button>
 
                   <button 
-                    onClick={() => setMethod('easypaisa')}
+                    onClick={() => setMethod('qr')}
                     className={`w-full flex items-center justify-between p-5 rounded-2xl border transition-all ${
-                      method === 'easypaisa' ? 'bg-emerald-600/10 border-emerald-500' : 'bg-white/5 border-white/10 hover:bg-white/10'
+                      method === 'qr' ? 'bg-emerald-600/10 border-emerald-500' : 'bg-white/5 border-white/10 hover:bg-white/10'
                     }`}
                   >
                     <div className="flex items-center gap-4">
                       <div className="w-10 h-10 bg-emerald-600 rounded-lg flex items-center justify-center">
-                        <Wallet className="w-6 h-6 text-white" />
+                        <Wallet className="w-5 h-5 text-white" />
                       </div>
                       <div className="text-left">
-                        <p className="font-bold">Easypaisa</p>
-                        <p className="text-xs text-white/40 italic">Local mobile payment</p>
+                        <p className="font-bold text-white">Local QR / Raast</p>
+                        <p className="text-xs text-white/40 italic">Easypaisa / Bank Transfer</p>
                       </div>
                     </div>
-                    {method === 'easypaisa' && <div className="w-4 h-4 bg-emerald-500 rounded-full shadow-[0_0_10px_#10b981]" />}
+                    {method === 'qr' && <div className="w-3 h-3 bg-emerald-500 rounded-full shadow-[0_0_10px_#10b981]" />}
                   </button>
                 </div>
 
@@ -142,43 +120,39 @@ export default function CheckoutModal({ service, isOpen, onClose }: CheckoutModa
                         rel="noreferrer"
                         className="w-full bg-[#0070ba] text-white py-5 rounded-2xl font-bold flex items-center justify-center gap-2 hover:bg-[#005ea6] transition-all group"
                       >
-                        Visit PayPal.me to Pay
+                        PAY VIA PAYPAL.ME
                         <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
                       </a>
                       <button 
-                        onClick={async () => {
-                          if (!user) return;
-                          setStatus('redirecting');
-                          try {
-                            await orderService.createOrder({
-                              userId: user.uid,
-                              serviceId: service.id,
-                              serviceTitle: service.title,
-                              status: 'pending',
-                              paymentStatus: 'unpaid',
-                              amount: service.price,
-                              paymentMethod: 'paypal'
-                            });
-                            setStatus('success');
-                          } catch (e) {
-                            console.error(e);
-                            setStatus('error');
-                          }
-                        }}
-                        className="w-full bg-white/5 border border-white/10 text-white py-4 rounded-2xl text-xs font-bold hover:bg-white/10 transition-all"
+                        onClick={() => handleManualOrder('paypal')}
+                        className="w-full bg-white/5 border border-white/10 text-white py-4 rounded-2xl text-[10px] font-bold hover:bg-white/10 transition-all uppercase tracking-widest"
                       >
-                        I've Paid — Start Project
+                        I've Paid — Start Now
+                      </button>
+                    </div>
+                  ) : method === 'qr' ? (
+                    <div className="flex flex-col gap-4">
+                      <div className="bg-white rounded-3xl p-6 flex flex-col items-center justify-center border border-black/5 shadow-inner">
+                        <p className="text-[9px] font-mono text-black/40 uppercase tracking-widest mb-3">Scan Till ID / Raast</p>
+                        <img 
+                          src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=990554169" 
+                          alt="QR" 
+                          className="w-28 h-28 mb-3" 
+                        />
+                        <p className="text-xl font-display font-black text-black">990554169</p>
+                      </div>
+                      <button 
+                        onClick={() => handleManualOrder('qr')}
+                        className="w-full bg-emerald-600 text-white py-5 rounded-2xl font-bold flex items-center justify-center gap-2 hover:bg-emerald-700 transition-all group shadow-lg shadow-emerald-500/20"
+                      >
+                        Initialize Project
+                        <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
                       </button>
                     </div>
                   ) : (
-                    <button 
-                      onClick={handleEasypaisaPayment}
-                      disabled={!method}
-                      className="w-full bg-white text-primary py-5 rounded-2xl font-bold flex items-center justify-center gap-2 hover:bg-blue-500 hover:text-white transition-all disabled:opacity-30 group"
-                    >
-                      Pay with {method === 'easypaisa' ? 'Easypaisa' : '...'}
-                      <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-                    </button>
+                    <div className="p-6 text-center text-white/30 text-xs italic">
+                      Please select a payment method above
+                    </div>
                   )}
                 </div>
                 

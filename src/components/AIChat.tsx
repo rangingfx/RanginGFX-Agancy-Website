@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { MessageSquare, X, Send, Bot, User, Loader2, Minus } from "lucide-react";
 import { ChatMessage } from "../types";
-import { getChatResponse } from "../services/gemini";
+import { getChatResponse } from "../services/aiService";
 
 export default function AIChat() {
   const [isOpen, setIsOpen] = useState(false);

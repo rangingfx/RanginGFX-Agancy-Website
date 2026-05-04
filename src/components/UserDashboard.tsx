@@ -259,16 +259,33 @@ export default function UserDashboard() {
                   <div>
                     <p className="text-xs font-mono text-white/30 uppercase tracking-widest mb-4">Target Order: {selectedOrderForPayment.serviceTitle}</p>
                     
-                    <a 
-                      href="https://paypal.me/pirpahtan" 
-                      target="_blank" 
-                      rel="noreferrer"
-                      className="w-full mb-6 bg-[#0070ba] text-white py-4 rounded-xl font-bold text-xs flex items-center justify-center gap-2 hover:bg-[#005ea6] transition-all shadow-lg shadow-blue-600/10"
-                    >
-                      <CreditCard className="w-4 h-4" /> PAY VIA PAYPAL.ME
-                    </a>
+                    {selectedOrderForPayment.paymentMethod === 'paypal' ? (
+                      <a 
+                        href="https://paypal.me/pirpahtan" 
+                        target="_blank" 
+                        rel="noreferrer"
+                        className="w-full mb-6 bg-[#0070ba] text-white py-4 rounded-xl font-bold text-xs flex items-center justify-center gap-2 hover:bg-[#005ea6] transition-all shadow-lg shadow-blue-600/10"
+                      >
+                        <CreditCard className="w-4 h-4" /> PAY VIA PAYPAL.ME
+                      </a>
+                    ) : (
+                      <div className="bg-emerald-600/5 border border-emerald-500/20 rounded-2xl p-6 mb-6 text-center">
+                        <p className="text-[10px] font-mono text-emerald-500/60 uppercase tracking-widest mb-4">Local Payment Method</p>
+                        <div className="flex flex-col items-center gap-2">
+                          <p className="text-white/40 text-[10px] uppercase font-mono">Scan Till ID / Raast</p>
+                          <h4 className="text-2xl font-display font-black text-white tracking-tighter">990554169</h4>
+                          <div className="mt-4 bg-white p-2 rounded-lg">
+                            <img 
+                              src="https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=990554169" 
+                              alt="QR" 
+                              className="w-24 h-24" 
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    )}
 
-                    <label className="block text-sm font-medium text-white/50 mb-2">Transaction ID / Reference</label>
+                    <label className="block text-sm font-medium text-white/50 mb-2">Enter Transaction ID / Reference</label>
                     <input 
                       type="text" 
                       value={transactionId}

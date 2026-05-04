@@ -8,7 +8,7 @@ export default function Pricing() {
   const { user } = useAuth();
   const [isCreatingOrder, setIsCreatingOrder] = useState(false);
 
-  const handleOrder = async (method: 'paypal' | 'qr') => {
+  const handleOrder = async (method: 'paypal' | 'qr' = 'qr') => {
     if (!user) {
       alert("Please sign in first to start a project.");
       return;
@@ -69,7 +69,7 @@ export default function Pricing() {
 
             <div className="grid lg:grid-cols-12 gap-12">
               {/* Features Column */}
-              <div className="lg:col-span-4 border-b lg:border-b-0 lg:border-r border-white/10 pb-8 lg:pb-0 lg:pr-12">
+              <div className="lg:col-span-12 xl:col-span-5 border-b xl:border-b-0 xl:border-r border-white/10 pb-8 xl:pb-0 xl:pr-12">
                 <div className="mb-8">
                   <h3 className="text-3xl font-display font-bold mb-4">Agency Retainer</h3>
                   <div className="flex items-baseline gap-2 mb-4">
@@ -82,7 +82,7 @@ export default function Pricing() {
                   </p>
                 </div>
                 
-                <ul className="space-y-4">
+                <ul className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-1 gap-4">
                   {[
                     "Custom Web App Development",
                     "Premium UI/UX Design",
@@ -100,20 +100,19 @@ export default function Pricing() {
                 </ul>
               </div>
 
-              {/* Payment Split */}
-              <div className="lg:col-span-8">
-                <div className="grid md:grid-cols-2 gap-12 items-start">
-                  {/* PayPal Column (Left) */}
+              {/* Payment Section */}
+              <div className="lg:col-span-12 xl:col-span-7">
+                <div className="grid md:grid-cols-2 gap-8">
+                  {/* PayPal Column */}
                   <div className="flex flex-col">
                     <div className="mb-6 text-center md:text-left">
                       <p className="text-[10px] font-mono text-white/30 uppercase tracking-[0.2em] mb-2">Method 01</p>
-                      <h4 className="text-xl font-display font-bold uppercase tracking-tight">International / PayPal</h4>
+                      <h4 className="text-xl font-display font-bold uppercase tracking-tight text-white">International / PayPal</h4>
                     </div>
                     
                     <div className="bg-white/5 rounded-3xl p-8 border border-white/10 mb-6 flex flex-col items-center justify-center relative overflow-hidden group">
                       <div className="absolute inset-0 bg-blue-600/5 opacity-0 group-hover:opacity-100 transition-opacity" />
                       <img src="https://cdn.simpleicons.org/paypal/003087" alt="PayPal" className="h-8 w-auto mb-6 relative z-10" />
-                      <p className="text-[10px] font-mono text-white/30 uppercase tracking-[0.2em] mb-6 relative z-10">Global Fast Checkout</p>
                       
                       <a 
                         href="https://paypal.me/pirpahtan" 
@@ -133,44 +132,52 @@ export default function Pricing() {
                         {isCreatingOrder ? "Registering..." : "I've Paid — Start Now"}
                       </button>
                     </div>
-                    
-                    <p className="text-[10px] text-white/30 flex items-center gap-2 mt-auto">
-                      <ShieldCheck className="w-3 h-3 text-emerald-500" />
-                      Verified International Merchant
-                    </p>
                   </div>
 
-                  {/* Local QR Column (Right) */}
-                  <div className="flex flex-col md:border-l md:border-white/10 md:pl-12">
+                  {/* Local QR Column */}
+                  <div className="flex flex-col md:border-l md:border-white/10 md:pl-8">
                     <div className="mb-6 text-center md:text-left">
                       <p className="text-[10px] font-mono text-white/30 uppercase tracking-[0.2em] mb-2">Method 02</p>
-                      <h4 className="text-xl font-display font-bold uppercase tracking-tight">Pakistan Local / QR</h4>
+                      <h4 className="text-xl font-display font-bold uppercase tracking-tight text-white mb-1">Pakistan Local / Raast</h4>
+                      <p className="text-[9px] text-emerald-500/60 font-mono uppercase tracking-widest">Instant Activation</p>
                     </div>
 
-                    <div className="bg-white/5 p-6 rounded-3xl flex flex-col items-center justify-center mb-8 border border-white/10 relative overflow-hidden group">
-                      <div className="absolute inset-0 bg-blue-600/5 opacity-0 group-hover:opacity-100 transition-opacity" />
-                      <p className="text-[10px] font-mono text-white/30 uppercase tracking-[0.2em] mb-4 relative z-10">Use this Till ID to Pay</p>
-                      <div className="text-center relative z-10">
-                        <h5 className="text-5xl font-display font-black text-blue-500 mb-2 tracking-tighter">990554169</h5>
-                        <p className="text-white/70 font-display font-bold uppercase tracking-tight">RanginGfx</p>
+                    <div className="bg-white rounded-[2rem] p-6 mb-6 flex flex-col items-center justify-center border border-white/10 relative overflow-hidden group shadow-2xl shadow-emerald-500/5">
+                      <div className="w-full flex justify-between items-center mb-6">
+                        <div className="flex items-center gap-2">
+                           <div className="w-6 h-6 bg-black rounded-full flex items-center justify-center">
+                             <div className="w-3 h-3 bg-emerald-500 rounded-full" />
+                           </div>
+                           <span className="text-[10px] font-black text-black tracking-tight">RanginGfx</span>
+                        </div>
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/0/0e/Raast_Logo.png" alt="Raast" className="h-4 w-auto grayscale brightness-0" />
                       </div>
-                      <div className="mt-6 flex gap-2 relative z-10">
-                        <span className="px-3 py-1 bg-emerald-500/10 text-emerald-500 text-[10px] font-black rounded-lg border border-emerald-500/20 uppercase">EasyPaisa</span>
-                        <span className="px-3 py-1 bg-purple-500/10 text-purple-500 text-[10px] font-black rounded-lg border border-purple-500/20 uppercase">Raast</span>
+
+                      <div className="bg-white p-2 rounded-xl mb-4">
+                        <img 
+                          src="https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=990554169&color=000000&bgcolor=ffffff" 
+                          alt="QR" 
+                          className="w-32 h-32" 
+                        />
+                      </div>
+
+                      <div className="text-center">
+                        <p className="text-[10px] font-mono text-black/40 uppercase tracking-[0.2em] mb-1">Till ID</p>
+                        <h5 className="text-xl font-display font-black text-black tracking-tighter">990554169</h5>
                       </div>
                     </div>
 
                     <button 
                       onClick={() => handleOrder('qr')}
                       disabled={isCreatingOrder}
-                      className="w-full py-4 bg-blue-600 text-white rounded-xl text-xs font-bold hover:bg-blue-700 transition-all flex items-center justify-center gap-2 group shadow-lg shadow-blue-600/20"
+                      className="w-full py-4 bg-emerald-600 text-white rounded-xl text-xs font-bold hover:bg-emerald-700 transition-all flex items-center justify-center gap-2 group shadow-lg shadow-emerald-600/20"
                     >
-                      {isCreatingOrder ? "Processing..." : "I'VE PAID VIA QR — START"}
+                      {isCreatingOrder ? "Processing..." : "I'VE PAID VIA QR"}
                       <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                     </button>
                     
                     <p className="text-[9px] text-white/30 mt-4 leading-relaxed text-center italic">
-                      Scan QR or use Raast ID. Submit receipt in dashboard after payment.
+                      Scan via EasyPaisa, JazzCash, or any Bank App using Raast.
                     </p>
                   </div>
                 </div>
