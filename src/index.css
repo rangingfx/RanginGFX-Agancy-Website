@@ -1,0 +1,83 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Outfit", sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+
+  --color-primary: #0B0B0B;
+  --color-accent: #2563EB;
+  --color-secondary: #7C3AED;
+
+  @keyframes gradient-x {
+    0%, 100% {
+      background-position: 0% 50%;
+    }
+    50% {
+      background-position: 100% 50%;
+    }
+  }
+
+  --animate-gradient-x: gradient-x 5s ease infinite;
+}
+
+@layer base {
+  body {
+    @apply font-sans antialiased bg-[#0A0A0A] text-white overflow-x-hidden;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
+@layer utilities {
+  .text-glass {
+    @apply bg-clip-text text-transparent bg-gradient-to-b from-white/90 to-white/40;
+  }
+  
+  .glass-card {
+    @apply bg-white/5 backdrop-blur-xl border border-white/10;
+  }
+
+  .mobile-card-grid {
+    @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6;
+  }
+
+  .rainbow-text {
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-[#ff0000] via-[#ff7f00] via-[#ffff00] via-[#00ff00] via-[#0000ff] via-[#4b0082] to-[#8f00ff] animate-gradient-x;
+    background-size: 200% 200%;
+  }
+
+  .rainbow-logo {
+    @apply font-black tracking-tighter uppercase;
+    background: linear-gradient(
+      to right,
+      #FF0000, #FF7F00, #FFFF00, #00FF00, #0000FF, #4B0082, #8F00FF
+    );
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-size: 200% auto;
+    animation: rainbow 4s linear infinite;
+  }
+
+  @keyframes rainbow {
+    to {
+      background-position: 200% center;
+    }
+  }
+
+  /* Hide Featurable Attribution */
+  [id^="featurable-"] + a,
+  [id^="featurable-"] ~ .featurable-power,
+  .featurable-power,
+  div[style*="text-align: right"] > a[href*="featurable.com"] {
+    display: none !important;
+    visibility: hidden !important;
+    height: 0 !important;
+    width: 0 !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+  }
+}

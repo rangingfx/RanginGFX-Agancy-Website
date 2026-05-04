@@ -1,0 +1,114 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // 0. Global Safety Net
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // --- REUSABLE HELPERS ---
+    function isSignedIn() { return request.auth != null; }
+    function isVerified() { return isSignedIn() && request.auth.token.email_verified == true; }
+    function isValidId(id) { return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$'); }
+    function incoming() { return request.resource.data; }
+    function existing() { return resource.data; }
+    function isOwner(userId) { return isSignedIn() && request.auth.uid == userId; }
+
+    // Test Path
+    match /test/connection {
+      allow read: if true;
+    }
+
+    // Admin lookup - Optimized for zero-trust
+    function isAdmin() { 
+      return isVerified() && 
+             exists(/databases/$(database)/documents/users/$(request.auth.uid)) && 
+             get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin'; 
+    }
+
+    // --- COLLECTION RULES ---
+
+    // Users (PII Isolation Strategy)
+    match /users/{userId} {
+      function isValidUser(data) {
+        return data.uid is string && data.uid.size() == 28 &&
+               data.email is string && data.email.size() <= 200 &&
+               data.role in ['user', 'admin'] &&
+               data.createdAt is timestamp;
+      }
+      
+      allow get: if isOwner(userId) || isAdmin();
+      allow list: if isAdmin();
+      allow create: if isSignedIn() && request.auth.uid == userId && 
+                    isValidUser(incoming()) && 
+                    incoming().role == 'user' &&
+                    incoming().createdAt == request.time;
+      allow update: if (isOwner(userId) || isAdmin()) && 
+                    (isAdmin() || (
+                      incoming().diff(existing()).affectedKeys().hasOnly(['displayName', 'photoURL', 'updatedAt']) &&
+                      incoming().updatedAt == request.time &&
+                      incoming().role == existing().role // Immutable role
+                    )) &&
+                    isValidUser(incoming());
+    }
+
+    // Services (Public - strictly read-only for clients)
+    match /services/{serviceId} {
+      allow get, list: if true;
+      allow write: if isAdmin();
+    }
+
+    // Portfolio (Public)
+    match /portfolio/{projectId} {
+      allow get, list: if true;
+      allow write: if isAdmin();
+    }
+
+    // Reviews (Public)
+    match /reviews/{reviewId} {
+      function isValidReview(data) {
+        return data.authorName is string && data.authorName.size() <= 100 &&
+               data.content is string && data.content.size() <= 2000 &&
+               data.rating is int && data.rating >= 1 && data.rating <= 5 &&
+               data.createdAt is timestamp;
+      }
+      
+      allow get, list: if true;
+      allow create: if isAdmin() && isValidReview(incoming()) && incoming().createdAt == request.time;
+      allow update: if isAdmin() && isValidReview(incoming());
+      allow delete: if isAdmin();
+    }
+
+    // Orders (Owned - High Security)
+    match /orders/{orderId} {
+      function isValidOrder(data) {
+        return data.userId == request.auth.uid &&
+               data.status in ['pending', 'processing', 'completed', 'cancelled'] &&
+               data.totalAmount is number &&
+               data.createdAt is timestamp;
+      }
+
+      allow get: if isVerified() && (resource.data.userId == request.auth.uid || isAdmin());
+      allow list: if isVerified() && (resource.data.userId == request.auth.uid || isAdmin());
+      
+      allow create: if isVerified() && 
+                    isValidOrder(incoming()) &&
+                    incoming().createdAt == request.time &&
+                    exists(/databases/$(database)/documents/services/$(incoming().serviceId));
+                    
+      allow update: if isAdmin();
+      allow delete: if isAdmin();
+    }
+
+    // Bookings (Owned)
+    match /bookings/{bookingId} {
+      allow get, list: if isVerified() && (resource.data.userId == request.auth.uid || isAdmin());
+      
+      allow create: if isVerified() && 
+                    incoming().userId == request.auth.uid &&
+                    incoming().createdAt == request.time;
+      allow update: if isAdmin();
+      allow delete: if isAdmin();
+    }
+  }
+}

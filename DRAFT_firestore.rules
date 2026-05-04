@@ -1,0 +1,92 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // 0. Global Safety Net
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // --- REUSABLE HELPERS ---
+    function isSignedIn() { return request.auth != null; }
+    function isValidId(id) { return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$'); }
+    function incoming() { return request.resource.data; }
+    function existing() { return resource.data; }
+    function isOwner(userId) { return isSignedIn() && request.auth.uid == userId; }
+
+    // Admin lookup
+    function isAdmin() { 
+      // Using exists() and then get() to be safe and clear.
+      return isSignedIn() && 
+             exists(/databases/$(database)/documents/users/$(request.auth.uid)) && 
+             get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin'; 
+    }
+
+    // --- COLLECTION RULES ---
+
+    // Users
+    match /users/{userId} {
+      function isValidUser(data) {
+        return data.uid is string && data.uid.size() <= 128 &&
+               data.email is string && data.email.size() <= 200 &&
+               data.role in ['user', 'admin'];
+      }
+      
+      allow get: if isSignedIn();
+      allow list: if isAdmin(); // Only admins can list users
+      allow create: if isSignedIn() && request.auth.uid == userId && isValidUser(incoming()) && incoming().role == 'user';
+      allow update: if (isOwner(userId) || isAdmin()) && 
+                    (isAdmin() || incoming().diff(existing()).affectedKeys().hasOnly(['displayName', 'photoURL'])) &&
+                    isValidUser(incoming());
+    }
+
+    // Services (Read for all, Write for admin)
+    match /services/{serviceId} {
+      allow get, list: if true;
+      allow write: if isAdmin();
+    }
+
+    // Portfolio (Read for all, Write for admin)
+    match /portfolio/{projectId} {
+      allow get, list: if true;
+      allow write: if isAdmin();
+    }
+
+    // Reviews (Read for all, Write for admin)
+    match /reviews/{reviewId} {
+      function isValidReview(data) {
+        return data.authorName is string && data.authorName.size() <= 100 &&
+               data.content is string && data.content.size() <= 2000 &&
+               data.rating is number && data.rating >= 1 && data.rating <= 5 &&
+               data.createdAt is string;
+      }
+      
+      allow get, list: if true;
+      allow create: if isAdmin() && isValidReview(incoming());
+      allow update: if isAdmin() && isValidReview(incoming());
+      allow delete: if isAdmin();
+    }
+
+    // Orders (Owned by user)
+    match /orders/{orderId} {
+      allow get: if isSignedIn() && (resource.data.userId == request.auth.uid || isAdmin());
+      allow list: if isSignedIn() && (resource.data.userId == request.auth.uid || isAdmin());
+      
+      allow create: if isSignedIn() && 
+                    incoming().userId == request.auth.uid &&
+                    exists(/databases/$(database)/documents/services/$(incoming().serviceId));
+                    
+      allow update: if isAdmin();
+      allow delete: if isAdmin();
+    }
+
+    // Bookings (Owned by user)
+    match /bookings/{bookingId} {
+      allow get: if isSignedIn() && (resource.data.userId == request.auth.uid || isAdmin());
+      allow list: if isSignedIn() && (resource.data.userId == request.auth.uid || isAdmin());
+      
+      allow create: if isSignedIn() && incoming().userId == request.auth.uid;
+      allow update: if isAdmin();
+      allow delete: if isAdmin();
+    }
+  }
+}

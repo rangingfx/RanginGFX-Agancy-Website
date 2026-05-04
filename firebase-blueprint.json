@@ -1,0 +1,116 @@
+{
+  "entities": {
+    "User": {
+      "title": "User Profile",
+      "description": "User account information and roles.",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string" },
+        "email": { "type": "string" },
+        "displayName": { "type": "string" },
+        "photoURL": { "type": "string" },
+        "role": { "type": "string", "enum": ["user", "admin"] },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["uid", "email", "role"]
+    },
+    "Service": {
+      "title": "Agency Service",
+      "description": "Services offered by RangingGfx.",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string" },
+        "description": { "type": "string" },
+        "category": { "type": "string" },
+        "price": { "type": "number" },
+        "icon": { "type": "string" },
+        "features": { "type": "array" }
+      },
+      "required": ["title", "description", "category", "price"]
+    },
+    "Order": {
+      "title": "Project Order",
+      "description": "A purchased service or custom project.",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "serviceId": { "type": "string" },
+        "status": { "type": "string", "enum": ["pending", "in-progress", "completed", "cancelled"] },
+        "paymentStatus": { "type": "string", "enum": ["unpaid", "paid"] },
+        "amount": { "type": "number" },
+        "domain": { "type": "string" },
+        "transactionId": { "type": "string" },
+        "paymentScreenshot": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId", "serviceId", "status", "paymentStatus"]
+    },
+    "Project": {
+      "title": "Portfolio Item",
+      "description": "Case studies and portfolio works.",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string" },
+        "description": { "type": "string" },
+        "category": { "type": "string" },
+        "imageUrl": { "type": "string" },
+        "link": { "type": "string" },
+        "tags": { "type": "array" }
+      },
+      "required": ["title", "category", "imageUrl"]
+    },
+    "Booking": {
+      "title": "Consultation Booking",
+      "description": "Scheduled meetings with clients.",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "date": { "type": "string", "format": "date-time" },
+        "topic": { "type": "string" },
+        "meetLink": { "type": "string" },
+        "status": { "type": "string", "enum": ["scheduled", "completed", "cancelled"] }
+      },
+      "required": ["userId", "date", "status"]
+    },
+    "Review": {
+      "title": "Client Review",
+      "description": "Testimonials from satisfied clients.",
+      "type": "object",
+      "properties": {
+        "authorName": { "type": "string" },
+        "authorRole": { "type": "string" },
+        "content": { "type": "string" },
+        "rating": { "type": "number" },
+        "photoURL": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["authorName", "content", "rating"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "User",
+      "description": "User profiles partitioned by UID."
+    },
+    "/services/{serviceId}": {
+      "schema": "Service",
+      "description": "Agency service catalog."
+    },
+    "/orders/{orderId}": {
+      "schema": "Order",
+      "description": "Customer orders."
+    },
+    "/portfolio/{projectId}": {
+      "schema": "Project",
+      "description": "Agency portfolio items."
+    },
+    "/bookings/{bookingId}": {
+      "schema": "Booking",
+      "description": "Consultation sessions."
+    },
+    "/reviews/{reviewId}": {
+      "schema": "Review",
+      "description": "Public client testimonials."
+    }
+  }
+}
